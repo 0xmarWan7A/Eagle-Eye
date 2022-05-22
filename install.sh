@@ -17,32 +17,32 @@ reset='\033[0m'
 version=$(curl -L -s https://golang.org/VERSION?m=text)
 #version="go1.17.6"
 printf "${bblue} Running: Installing/Updating Golang ${reset}\n\n"
-if [[ $(eval type go $DEBUG_ERROR | grep -o 'go is') == "go is" ]] && [ "$version" = $(go version | cut -d " " -f3) ]
+if [[ $(eval type go 2>/dev/null | grep -o 'go is') == "go is" ]] && [ "$version" = $(go version | cut -d " " -f3) ]
     then
         printf "${bgreen} Golang is already installed and updated ${reset}\n\n"
     else
-        eval $SUDO rm -rf /usr/local/go $DEBUG_STD
+        eval sudo rm -rf /usr/local/go $DEBUG_STD
         if [ "True" = "$IS_ARM" ]; then
             if [ "True" = "$RPI_3" ]; then
-                eval wget https://dl.google.com/go/${version}.linux-armv6l.tar.gz $DEBUG_STD
-                eval $SUDO tar -C /usr/local -xzf ${version}.linux-armv6l.tar.gz $DEBUG_STD
+                eval wget https://dl.google.com/go/${version}.linux-armv6l.tar.gz &>/dev/null
+                eval sudo tar -C /usr/local -xzf ${version}.linux-armv6l.tar.gz &>/dev/null
             elif [ "True" = "$RPI_4" ]; then
-                eval wget https://dl.google.com/go/${version}.linux-arm64.tar.gz $DEBUG_STD
-                eval $SUDO tar -C /usr/local -xzf ${version}.linux-arm64.tar.gz $DEBUG_STD
+                eval wget https://dl.google.com/go/${version}.linux-arm64.tar.gz &>/dev/null
+                eval sudo tar -C /usr/local -xzf ${version}.linux-arm64.tar.gz &>/dev/null
             fi
         elif [ "True" = "$IS_MAC" ]; then
             if [ "True" = "$IS_ARM" ]; then
-                eval wget https://dl.google.com/go/${version}.darwin-arm64.tar.gz $DEBUG_STD
-                eval $SUDO tar -C /usr/local -xzf ${version}.darwin-arm64.tar.gz $DEBUG_STD
+                eval wget https://dl.google.com/go/${version}.darwin-arm64.tar.gz &>/dev/null
+                eval sudo tar -C /usr/local -xzf ${version}.darwin-arm64.tar.gz &>/dev/null
             else
-                eval wget https://dl.google.com/go/${version}.darwin-amd64.tar.gz $DEBUG_STD
-                eval $SUDO tar -C /usr/local -xzf ${version}.darwin-amd64.tar.gz $DEBUG_STD
+                eval wget https://dl.google.com/go/${version}.darwin-amd64.tar.gz &>/dev/null
+                eval sudo tar -C /usr/local -xzf ${version}.darwin-amd64.tar.gz &>/dev/null
             fi
         else
-            eval wget https://dl.google.com/go/${version}.linux-amd64.tar.gz $DEBUG_STD
-            eval $SUDO tar -C /usr/local -xzf ${version}.linux-amd64.tar.gz $DEBUG_STD
+            eval wget https://dl.google.com/go/${version}.linux-amd64.tar.gz &>/dev/null
+            eval sudo tar -C /usr/local -xzf ${version}.linux-amd64.tar.gz &>/dev/null
         fi
-        eval $SUDO ln -sf /usr/local/go/bin/go /usr/local/bin/
+        eval sudo ln -sf /usr/local/go/bin/go /usr/local/bin/
         rm -rf $version*
         export GOROOT=/usr/local/go
         export GOPATH=$HOME/go
@@ -140,3 +140,5 @@ mv nuclei-templates Sublist3r ParamSpider cloud_enum ctfr ~/Tools
 wget https://github.com/RustScan/RustScan/releases/download/2.0.1/rustscan_2.0.1_amd64.deb
 
 dpkg -i rustscan_2.0.1_amd64.deb
+
+
