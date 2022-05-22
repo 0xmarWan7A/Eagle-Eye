@@ -1,5 +1,4 @@
 #/bin/bash
-
 bred='\033[1;31m'
 bblue='\033[1;34m'
 bgreen='\033[1;32m'
@@ -9,10 +8,8 @@ blue='\033[0;34m'
 green='\033[0;32m'
 yellow='\033[0;33m'
 reset='\033[0m'
-
 # Installing latest Golang version
 version=$(curl -L -s https://golang.org/VERSION?m=text)
-
 #version="go1.17.6"
 printf "${bblue} Running: Installing/Updating Golang ${reset}\n\n"
 if [[ $(eval type go 2>/dev/null | grep -o 'go is') == "go is" ]] && [ "$version" = $(go version | cut -d " " -f3) ]
@@ -138,5 +135,3 @@ mv nuclei-templates Sublist3r ParamSpider cloud_enum ctfr ~/Tools
 wget https://github.com/RustScan/RustScan/releases/download/2.0.1/rustscan_2.0.1_amd64.deb
 
 dpkg -i rustscan_2.0.1_amd64.deb
-
-
