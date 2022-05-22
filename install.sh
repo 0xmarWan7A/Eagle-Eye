@@ -1,8 +1,8 @@
 #/bin/bash
 
-DEBUG_ERROR = "2>/dev/null"
-DEBUG_STD = "&>/dev/null"
-SUDO = "sudo"
+DEBUG_ERROR= "2>/dev/null"
+DEBUG_STD= "&>/dev/null"
+SUDO= "sudo"
 
 bred='\033[1;31m'
 bblue='\033[1;34m'
