@@ -10,14 +10,6 @@ green='\033[0;32m'
 yellow='\033[0;33m'
 reset='\033[0m'
 
-printf("${bblue}   #########################################################################")
-printf("${bblue}   #                                                                       #")
-printf("${bblue}   #                                Eagle-Eye                              #")
-printf("${bblue}   #                                                                       #")
-printf("${bblue}   #########################################################################")
-printf("") 
-
-
 # Installing latest Golang version
 version=$(curl -L -s https://golang.org/VERSION?m=text)
 
