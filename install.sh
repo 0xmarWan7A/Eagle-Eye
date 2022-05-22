@@ -1,5 +1,65 @@
 #/bin/bash
 
+DEBUG_STD="&>/dev/null"
+DEBUG_ERROR="2>/dev/null"
+SUDO="sudo"
+
+bred='\033[1;31m'
+bblue='\033[1;34m'
+bgreen='\033[1;32m'
+byellow='\033[1;33m'
+red='\033[0;31m'
+blue='\033[0;34m'
+green='\033[0;32m'
+yellow='\033[0;33m'
+reset='\033[0m'
+
+# Installing latest Golang version
+version=$(curl -L -s https://golang.org/VERSION?m=text)
+#version="go1.17.6"
+printf "${bblue} Running: Installing/Updating Golang ${reset}\n\n"
+if [[ $(eval type go $DEBUG_ERROR | grep -o 'go is') == "go is" ]] && [ "$version" = $(go version | cut -d " " -f3) ]
+    then
+        printf "${bgreen} Golang is already installed and updated ${reset}\n\n"
+    else
+        eval $SUDO rm -rf /usr/local/go $DEBUG_STD
+        if [ "True" = "$IS_ARM" ]; then
+            if [ "True" = "$RPI_3" ]; then
+                eval wget https://dl.google.com/go/${version}.linux-armv6l.tar.gz $DEBUG_STD
+                eval $SUDO tar -C /usr/local -xzf ${version}.linux-armv6l.tar.gz $DEBUG_STD
+            elif [ "True" = "$RPI_4" ]; then
+                eval wget https://dl.google.com/go/${version}.linux-arm64.tar.gz $DEBUG_STD
+                eval $SUDO tar -C /usr/local -xzf ${version}.linux-arm64.tar.gz $DEBUG_STD
+            fi
+        elif [ "True" = "$IS_MAC" ]; then
+            if [ "True" = "$IS_ARM" ]; then
+                eval wget https://dl.google.com/go/${version}.darwin-arm64.tar.gz $DEBUG_STD
+                eval $SUDO tar -C /usr/local -xzf ${version}.darwin-arm64.tar.gz $DEBUG_STD
+            else
+                eval wget https://dl.google.com/go/${version}.darwin-amd64.tar.gz $DEBUG_STD
+                eval $SUDO tar -C /usr/local -xzf ${version}.darwin-amd64.tar.gz $DEBUG_STD
+            fi
+        else
+            eval wget https://dl.google.com/go/${version}.linux-amd64.tar.gz $DEBUG_STD
+            eval $SUDO tar -C /usr/local -xzf ${version}.linux-amd64.tar.gz $DEBUG_STD
+        fi
+        eval $SUDO ln -sf /usr/local/go/bin/go /usr/local/bin/
+        rm -rf $version*
+        export GOROOT=/usr/local/go
+        export GOPATH=$HOME/go
+        export PATH=$GOPATH/bin:$GOROOT/bin:$HOME/.local/bin:$PATH
+cat << EOF >> ~/${profile_shell}
+# Golang vars
+export GOROOT=/usr/local/go
+export GOPATH=\$HOME/go
+export PATH=\$GOPATH/bin:\$GOROOT/bin:\$HOME/.local/bin:\$PATH
+EOF
+
+fi
+
+[ -n "$GOPATH" ] || { printf "${bred} GOPATH env var not detected, add Golang env vars to your \$HOME/.bashrc or \$HOME/.zshrc:\n\n export GOROOT=/usr/local/go\n export GOPATH=\$HOME/go\n export PATH=\$GOPATH/bin:\$GOROOT/bin:\$PATH\n\n"; exit 1; }
+[ -n "$GOROOT" ] || { printf "${bred} GOROOT env var not detected, add Golang env vars to your \$HOME/.bashrc or \$HOME/.zshrc:\n\n export GOROOT=/usr/local/go\n export GOPATH=\$HOME/go\n export PATH=\$GOPATH/bin:\$GOROOT/bin:\$PATH\n\n"; exit 1; }
+
 sudo apt install python3 python3-pip build-essential gcc cmake ruby git curl libpcap-dev wget zip python3-dev pv dnsutils libssl-dev libffi-dev libxml2-dev libxslt1-dev zlib1g-dev nmap jq apt-transport-https lynx tor medusa xvfb libxml2-utils procps bsdmainutils libdata-hexdump-perl -y
 
 sudo apt-get install jq
