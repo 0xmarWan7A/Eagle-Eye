@@ -350,37 +350,46 @@ End_Points()
 #extract all javascript files
 
 def Extract_JSFiles():
-    print("")
-    print("")
-    print(colored("   #########################################################################", "red", attrs=['bold']))
-    print(colored("   #                         Start Extracting JS Files                     #", "red", attrs=['bold']))
-    print(colored("   #########################################################################", "red", attrs=['bold']))
-    print("")
-    time.sleep(5)
-    subprocess.call("cat hosts.txt | getJS --complete --resolve --insecure --output Content-Discovery/getJS.txt " , shell=True)
-    subprocess.call("subfinder -d " + target + " -silent | httpx | subjs | anew Content-Discovery/js-files.txt" , shell=True)
-    subprocess.call("cat Content-Discovery/js-files.txt Content-Discovery/getJS.txt | sort -u | uro | anew Content-Discovery/jsfiles.txt " ,shell=True)
-    subprocess.call("rm -rf Content-Discovery/js-files.txt Content-Discovery/getJS.txt" ,shell=True)
-    subprocess.call("clear", shell=True)
+
+    if os.path.exists("Content-Discovery/jsfiles.txt"):
+        pass
+    else:
+        print("")
+        print("")
+        print(colored("   #########################################################################", "red", attrs=['bold']))
+        print(colored("   #                         Start Extracting JS Files                     #", "red", attrs=['bold']))
+        print(colored("   #########################################################################", "red", attrs=['bold']))
+        print("")
+        time.sleep(5)
+        subprocess.call("cat hosts.txt | getJS --complete --resolve --insecure --output Content-Discovery/getJS.txt " , shell=True)
+        subprocess.call("subfinder -d " + target + " -silent | httpx | subjs | anew Content-Discovery/js-files.txt" , shell=True)
+        subprocess.call("cat Content-Discovery/js-files.txt Content-Discovery/getJS.txt | sort -u | uro | anew Content-Discovery/jsfiles.txt " ,shell=True)
+        subprocess.call("rm -rf Content-Discovery/js-files.txt Content-Discovery/getJS.txt" ,shell=True)
+        subprocess.call("clear", shell=True)
+
 Extract_JSFiles()
 
 #extract juicy data from js-files
 
 def Secret_Finder():
-    print("")
-    print("")
-    print(colored("   #########################################################################", "red", attrs=['bold']))
-    print(colored("   #                Start Extracting Juicy Data From JSFiles               #", "red", attrs=['bold']))
-    print(colored("   #########################################################################", "red", attrs=['bold']))
-    print("")
-    time.sleep(5)
-    print("")
-    print(colored("                                   ##### Nuclei #####                                    ", "blue", attrs=['bold']))
-    time.sleep(3)
-    print("")
-    subprocess.call("cat Content-Discovery/jsfiles.txt | nuclei -t ~/nuclei-templates/exposures -o Content-Discovery/Secret-Tokens.txt" , shell=True)
-    #subprocess.call("cd ../",shell=True)
-    subprocess.call("clear", shell=True)
+
+    if os.path.exists("Content-Discovery/Secret-Tokens.txt"):
+        pass
+    else:
+        print("")
+        print("")
+        print(colored("   #########################################################################", "red", attrs=['bold']))
+        print(colored("   #                Start Extracting Juicy Data From JSFiles               #", "red", attrs=['bold']))
+        print(colored("   #########################################################################", "red", attrs=['bold']))
+        print("")
+        time.sleep(5)
+        print("")
+        print(colored("                                   ##### Nuclei #####                                    ", "blue", attrs=['bold']))
+        time.sleep(3)
+        print("")
+        subprocess.call("cat Content-Discovery/jsfiles.txt | nuclei -t ~/nuclei-templates/exposures -o Content-Discovery/Secret-Tokens.txt" , shell=True)
+        #subprocess.call("cd ../",shell=True)
+        subprocess.call("clear", shell=True)
 Secret_Finder()
 
 #extract all juicy files
@@ -404,25 +413,30 @@ Secret_Finder()
 #search for reflected xss
 
 def Reflected_XSS():
-    print("")
-    print("")
-    print(colored("   #########################################################################", "red", attrs=['bold']))
-    print(colored("   #                    Start Searching For Reflected XSS                  #", "red", attrs=['bold']))
-    print(colored("   #########################################################################", "red", attrs=['bold']))
-    print("")
-    time.sleep(5)
-    subprocess.call("mkdir Reflected-XSS", shell=True)
-    #os.chdir("Reflected-XSS")
-    print("")
-    print(colored("                           ##### ParamSpider && Kxss && dalfox #####                                  ", "blue", attrs=['bold']))
-    time.sleep(3)
-    print("")
-    subprocess.call("python3 ~/Tools/ParamSpider/paramspider.py -d " + target + " -l high" , shell=True)
-    subprocess.call("mv output/" + target + ".txt Reflected-XSS/ && rm -rf output && mv Reflected-XSS/" + target + ".txt params.txt"  ,shell=True)
-    subprocess.call("cat Reflected-XSS/params.txt | kxss | grep '< >' | cut -d ' ' -f 2 | anew Reflected-XSS/unfiltered.txt" ,shell=True)
-    subprocess.call("dalfox file Reflected-XSS/unfiltered.txt --waf-evasion --user-agent -b 0xmarWan7A.xss.ht pipe -o Reflected-XSS/XSS_poc.txt" ,shell=True)
-    #subprocess.call("cd ../", shell=True)
-    subprocess.call("clear", shell=True)
+
+    if os.path.isdir("Reflected-XSS"):
+        if os.path.exists("Reflected-XSS/params.txt"):
+            pass
+    else:
+        print("")
+        print("")
+        print(colored("   #########################################################################", "red", attrs=['bold']))
+        print(colored("   #                    Start Searching For Reflected XSS                  #", "red", attrs=['bold']))
+        print(colored("   #########################################################################", "red", attrs=['bold']))
+        print("")
+        time.sleep(5)
+        subprocess.call("mkdir Reflected-XSS", shell=True)
+        #os.chdir("Reflected-XSS")
+        print("")
+        print(colored("                           ##### ParamSpider && Kxss && dalfox #####                                  ", "blue", attrs=['bold']))
+        time.sleep(3)
+        print("")
+        subprocess.call("python3 ~/Tools/ParamSpider/paramspider.py -d " + target + " -l high" , shell=True)
+        subprocess.call("mv output/" + target + ".txt Reflected-XSS/ && rm -rf output && mv Reflected-XSS/" + target + ".txt params.txt"  ,shell=True)
+        subprocess.call("cat Reflected-XSS/params.txt | kxss | grep '< >' | cut -d ' ' -f 2 | anew Reflected-XSS/unfiltered.txt" ,shell=True)
+        subprocess.call("dalfox file Reflected-XSS/unfiltered.txt --waf-evasion --user-agent -b 0xmarWan7A.xss.ht pipe -o Reflected-XSS/XSS_poc.txt" ,shell=True)
+        #subprocess.call("cd ../", shell=True)
+        subprocess.call("clear", shell=True)
 Reflected_XSS()
 
 def technologies_detect():
