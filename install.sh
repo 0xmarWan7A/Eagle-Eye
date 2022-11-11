@@ -51,15 +51,52 @@ clear
 echo -e "${BOLDGREEN}"
 
 echo "   #########################################################################"
+echo "   #                           Installing AWS-CLI                          #"
+echo "   #########################################################################"
+
+echo -e "${RED}"
+
+sudo python3 -m pip install awscli
+
+echo -e "${BOLDGREEN}"
+
+echo "   #########################################################################"
+echo "   #                            Installing Shodan                          #"
+echo "   #########################################################################"
+
+echo -e "${RED}"
+
+sudo pip install shodan
+
+echo -e "${BOLDGREEN}"
+
+echo "   #########################################################################"
+echo "   #                           Installing Masscan                          #"
+echo "   #########################################################################"
+
+echo -e "${RED}"
+
+git clone https://github.com/robertdavidgraham/masscan
+cd masscan
+make
+make install
+mv list/resolvers.txt ~/Tools
+cd ../
+clear
+
+echo -e "${BOLDGREEN}"
+
+echo "   #########################################################################"
 echo "   #                          Installing Findomain                         #"
 echo "   #########################################################################"
 
 echo -e "${RED}"
 
-wget https://github.com/findomain/findomain/releases/latest/download/findomain-linux
-mv findomain-linux findomain
+curl -LO https://github.com/findomain/findomain/releases/latest/download/findomain-linux-i386.zip
+unzip findomain-linux-i386.zip
 chmod +x findomain
-mv findomain /usr/local/bin
+sudo mv findomain /usr/local/bin/findomain
+sudo rm -rf findomain-linux-i386.zip
 clear
 
 echo -e "${BOLDGREEN}"
@@ -253,12 +290,33 @@ clear
 echo -e "${BOLDGREEN}"
 
 echo "   #########################################################################"
+echo "   #                           Installing katana                           #"
+echo "   #########################################################################"
+
+echo -e "${RED}"
+
+go install github.com/projectdiscovery/katana/cmd/katana@latest
+
+echo -e "${BOLDGREEN}"
+
+echo "   #########################################################################"
 echo "   #                           Installing subjs                            #"
 echo "   #########################################################################"
 
 echo -e "${RED}"
 
 GO111MODULE=on go install -v github.com/lc/subjs@latest
+clear
+
+echo -e "${BOLDGREEN}"
+
+echo "   #########################################################################"
+echo "   #                            Installing getJS                           #"
+echo "   #########################################################################"
+
+echo -e "${RED}"
+
+go install github.com/003random/getJS@latest
 clear
 
 echo -e "${BOLDGREEN}"

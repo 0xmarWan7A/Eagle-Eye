@@ -60,6 +60,9 @@ target_name = target.split(".")[0]
 
 if os.path.exists("github_token.txt"):
     print(colored("[+] Github token already exists", "green", attrs=['bold']))
+    with open("github_token.txt", "r") as f:
+        github_token = f.read()
+        f.close()
     print("")
     if os.path.isdir(target_name):
         pass
@@ -87,8 +90,23 @@ else:
     print(colored("[+] Change directory to " + target_name , "blue", attrs=['bold']))
     os.chdir(target_name)
     print("")
-    time.sleep(3)
+    time.sleep(2)
 
+# if os.path.exists("shodan_api.txt"):
+#     print(colored("\n[+] Shodan API key already exists\n", "green", attrs=['bold']))
+#     time.sleep(2)
+#     pass
+
+# else:
+#     shodan_api = input(colored("\n[+] Enter your shodan api key : ", "blue", attrs=['bold']))
+#     time.sleep(2)
+#     if shodan_api:
+#         subprocess.call("\nshodan init " + shodan_api , shell=True)
+#         with open("shodan_api.txt", "w") as f:
+#             f.write(shodan_api)
+#             f.close()
+#             print(colored("\n[+] Done! Shodan API key saved successfully\n\n", "green", attrs=['bold']))
+#             time.sleep(2)
 
 # Type Of Scan
 
@@ -178,6 +196,7 @@ def Sub_Domains():
             print(colored("   #########################################################################", "red", attrs=['bold']))
             print("")
             time.sleep(5)
+            os.system("echo -e '\e[1;32m'")
             subprocess.call("cat *.txt | sort -u | anew subdomains.txt",shell=True)
             subprocess.call("rm -rf subfinder.txt sublist3r.txt assetfinder.txt findomain.txt amass_passive.txt amass_active.txt crtsh.txt crobat.txt curl.txt " + target + ".txt ",shell=True)
             subprocess.call("cat subdomains.txt | httpx -silent -t 250 -o hosts.txt",shell=True)
@@ -213,7 +232,7 @@ def Sub_Domains():
             subprocess.call("cat subdomains.txt | httpx -silent -t 250 -o hosts.txt",shell=True)
             subprocess.call("clear" ,shell=True)
         else:
-            print(colored("[-] Wrong Number !! ", "red", attrs=['boldcolored(']))
+            print(colored("[-] Wrong Number !! ", "red", attrs=['bold']))
             Sub_Domains()
 
 Sub_Domains()
@@ -230,7 +249,12 @@ def Collect_ips():
         time.sleep(5)
         os.system("echo -e '\e[1;32m'")
         subprocess.call("cat hosts.txt | httpx -silent -pa -t 300 -o ip.txt", shell=True)
+        subprocess.call("shodan search hostname:" + target + " | awk '{print $1}' | anew shodan_ips.txt", shell=True)
+        subprocess.call("shodan search ssl:" + target + ".* | awk '{print $1}' | anew shodan_ips.txt", shell=True)
+        subprocess.call("shodan search ssl.cert.subject.CN:" + target + ".* 200 | awk '{print $1}' | anew shodan_ips.txt", shell=True)
         subprocess.call("cat ip.txt | cut -d '[' -f 2 | cut -d ']' -f 1 | anew ips.txt" , shell=True)
+        subprocess.call("cat shodan_ips.txt | sort -u | anew ips.txt" ,shell=True)
+        subprocess.call("rm -rf shodan_ips.txt", shell=True)
         subprocess.call("rm -rf ip.txt", shell=True)
         subprocess.call("clear" ,shell=True)
 
@@ -262,7 +286,7 @@ def Subdomain_TakeOver():
         print(colored("                             ##### SubOver #####                                    ", "blue", attrs=['bold']))
         time.sleep(3)
         print("")
-        subprocess.call("cp ~/Tools/config/providers.json Subdomain_TakeOver/ " , shell=True)
+        subprocess.call("cp ~/Tools/config/providers.json ." , shell=True)
         subprocess.call("SubOver -l subdomains.txt -a -t 100 -v -https -timeout 30 | anew Subdomain_TakeOver/subover.txt " ,shell=True)
         subprocess.call("cat Subdomain_TakeOver/subover.txt Subdomain_TakeOver/subjack.txt | anew Subdomain_TakeOver/subdomain_takeover.txt " ,shell=True)
         subprocess.call("rm -rf Subdomain_TakeOver/subover.txt Subdomain_TakeOver/subjack.txt " ,shell=True)
@@ -320,6 +344,7 @@ def End_Points():
         print(colored("                             ##### Waybackurls #####                                    ", "blue", attrs=['bold']))
         time.sleep(3)
         print("")
+        os.system("echo -e '\e[1;32m'")
         subprocess.call("cat hosts.txt | waybackurls | grep -i -v -e .doc -e .docx -e .pdf -e .css -e .jpg -e .gif -e .jpeg -e .png -e .svg -e .ico -e .wav -e .mp3 -e .mp4 | anew Content-Discovery/waybackurls_output.txt",shell=True)
         print("")
         subprocess.call("cat Content-Discovery/waybackurls_output.txt | sort -u | uro  | anew Content-Discovery/wayback.txt" , shell=True)
@@ -337,6 +362,7 @@ def End_Points():
         print(colored("                                   ##### Gau #####                                    ", "blue", attrs=['bold']))
         time.sleep(3)
         print("")
+        os.system("echo -e '\e[1;32m'")
         subprocess.call("cat hosts.txt | gau --subs --threads 30 --blacklist png,jpg,gif,jpeg,css,svg,ico,wav,mp3,mp4,doc,docx,pdf --mc 200 --o Content-Discovery/gau_output.txt",shell=True)
         print("")
         subprocess.call("cat Content-Discovery/gau_output.txt | sort -u | uro  | anew Content-Discovery/gau.txt" , shell=True)
@@ -361,10 +387,12 @@ def Extract_JSFiles():
         print(colored("   #########################################################################", "red", attrs=['bold']))
         print("")
         time.sleep(5)
-        subprocess.call("cat hosts.txt | getJS --complete --resolve --insecure --output Content-Discovery/getJS.txt " , shell=True)
+        os.system("echo -e '\e[1;32m'")
+        subprocess.call("cat hosts.txt | getJS --complete --resolve --insecure --output Content-Discovery/getJS.txt" , shell=True)
         subprocess.call("subfinder -d " + target + " -silent | httpx | subjs | anew Content-Discovery/js-files.txt" , shell=True)
-        subprocess.call("cat Content-Discovery/js-files.txt Content-Discovery/getJS.txt | sort -u | uro | anew Content-Discovery/jsfiles.txt " ,shell=True)
-        subprocess.call("rm -rf Content-Discovery/js-files.txt Content-Discovery/getJS.txt" ,shell=True)
+        subprocess.call("cat hosts.txt | katana -silent -em js -o Content-Discovery/katanajs.txt",shell=True)
+        subprocess.call("cat Content-Discovery/js-files.txt Content-Discovery/getJS.txt Content-Discovery/katanajs.txt | sort -u | uro | anew Content-Discovery/jsfiles.txt " ,shell=True)
+        subprocess.call("rm -rf Content-Discovery/js-files.txt Content-Discovery/getJS.txt Content-Discovery/katanajs.txt" ,shell=True)
         subprocess.call("clear", shell=True)
 
 Extract_JSFiles()
@@ -394,20 +422,21 @@ Secret_Finder()
 
 #extract all juicy files
 
-#def Extract_JuicyFiles():
-    #print("")
-    #print("")
-    #print(colored("   #########################################################################", "red", attrs=['bold']))
-    #print(colored("   #                       Start Extracting Juicy Files                    #", "red", attrs=['bold']))
-    #print(colored("   #########################################################################", "red", attrs=['bold']))
-    #print("")
-    #time.sleep(5)
-    #subprocess.call("cat endpoints.txt | grep '.php$' | grep '.sql$' | grep '.tar$' | grep '.zip$' | grep '.rar$' | grep '.bak$' | grep '.gz$' | grep '.conf$' | grep '.config$' | grep '.yaml$' | grep '.sh$' | grep '.py$' | grep '.xml' | grep '.info$' | grep '.json$' | grep '.pl$' | grep '.rb$' | grep '.csv$' | grep '.xls$' | grep '.xlsx$' | grep '.txt$' | anew juicy-files.txt " , shell=True)
-    #subprocess.call("cat juicy-files.txt |sort -u | uro | anew juicy_files.txt " ,shell=True)
-    #subprocess.call("rm -rf juicy-files.txt" ,shell=True)
-    #subprocess.call("cd ../",shell=True)
-    #subprocess.call("clear", shell=True)
-#Extract_JSFiles()
+def Extract_JuicyFiles():
+    if os.path.exists("Content-Discovery/juicy-files.txt"):
+        pass
+    else:
+        print("")
+        print("")
+        print(colored("   #########################################################################", "red", attrs=['bold']))
+        print(colored("   #                       Start Extracting Juicy Files                    #", "red", attrs=['bold']))
+        print(colored("   #########################################################################", "red", attrs=['bold']))
+        print("")
+        time.sleep(5)
+        subprocess.call("cat hosts.txt | katana -silent -d 5 -em php, sql, tar, zip, rar, bak, gz, conf, config, yaml, sh, py, xml, info, json, pl, rb, csv, xls, xlsx, txt -o Content-Discovery/juicy-files.txt" , shell=True)
+        # subprocess.call("cd ../",shell=True)
+        subprocess.call("clear", shell=True)
+Extract_JSFiles()
 
 
 #search for reflected xss
@@ -440,96 +469,112 @@ def Reflected_XSS():
 Reflected_XSS()
 
 def technologies_detect():
-    print("")
-    print("")
-    print(colored("   #########################################################################", "red", attrs=['bold']))
-    print(colored("   #                      Start Searching For Technologies                 #", "red", attrs=['bold']))
-    print(colored("   #########################################################################", "red", attrs=['bold']))
-    print("")
-    time.sleep(5)
-    subprocess.call("mkdir Technologies", shell=True)
-    #os.chdir("Technologies")
-    print("")
-    print(colored("                                   ##### nuclei #####                                    ", "blue", attrs=['bold']))
-    time.sleep(3)
-    print("")
-    subprocess.call("cat hosts.txt | nuclei -t ~/nuclei-templates/technologies/ -o Technologies/technologies.txt" , shell=True)
-    #subprocess.call("cd ../", shell=True)
-    subprocess.call("clear", shell=True)
+    if os.path.isdir("Technologies"):
+        if os.path.exists("Technologies/technologies.txt"):
+            pass
+    else:
+        print("")
+        print("")
+        print(colored("   #########################################################################", "red", attrs=['bold']))
+        print(colored("   #                      Start Searching For Technologies                 #", "red", attrs=['bold']))
+        print(colored("   #########################################################################", "red", attrs=['bold']))
+        print("")
+        time.sleep(5)
+        subprocess.call("mkdir Technologies", shell=True)
+        #os.chdir("Technologies")
+        print("")
+        print(colored("                                   ##### nuclei #####                                    ", "blue", attrs=['bold']))
+        time.sleep(3)
+        print("")
+        subprocess.call("cat hosts.txt | nuclei -t ~/nuclei-templates/technologies/ -o Technologies/technologies.txt" , shell=True)
+        #subprocess.call("cd ../", shell=True)
+        subprocess.call("clear", shell=True)
 technologies_detect()
 
 #bruteforcing directories using ffuf
 
 def Directory_Fuzzing():
-    print("")
-    print("")
-    print(colored("   #########################################################################", "red", attrs=['bold']))
-    print(colored("   #                         Start Fuzzing Directories                     #", "red", attrs=['bold']))
-    print(colored("   #########################################################################", "red", attrs=['bold']))
-    print("")
-    time.sleep(5)
-    subprocess.call("mkdir Fuzz", shell=True)
-    #os.chdir("Fuzz")
-    print("")
-    print(colored("                                   ##### FFUF #####                                    ", "blue", attrs=['bold']))
-    time.sleep(3)
-    print("")
-    subprocess.call("ffuf -u HFUZZ:WFUZZ -X POST -w hosts.txt:HFUZZ -w ~/Wordlists/Fuzz.txt:WFUZZ -t 50 -c -v -r -mc 200,403 -o Fuzz/dir.txt" ,shell=True)
-    #subprocess.call("cd ../", shell=True)
-    subprocess.call("clear", shell=True)
+    if os.path.isdir("Fuzz"):
+        if os.path.exists("Fuzz/dir.txt"):
+            pass
+    else:
+        print("")
+        print("")
+        print(colored("   #########################################################################", "red", attrs=['bold']))
+        print(colored("   #                         Start Fuzzing Directories                     #", "red", attrs=['bold']))
+        print(colored("   #########################################################################", "red", attrs=['bold']))
+        print("")
+        time.sleep(5)
+        subprocess.call("mkdir Fuzz", shell=True)
+        #os.chdir("Fuzz")
+        print("")
+        print(colored("                                   ##### FFUF #####                                    ", "blue", attrs=['bold']))
+        time.sleep(3)
+        print("")
+        subprocess.call("ffuf -u HFUZZ:WFUZZ -X POST -w hosts.txt:HFUZZ -w ~/Wordlists/Fuzz.txt:WFUZZ -t 50 -c -v -r -mc 200,403 -o Fuzz/dir.txt" ,shell=True)
+        #subprocess.call("cd ../", shell=True)
+        subprocess.call("clear", shell=True)
 Directory_Fuzzing() 
 
 
 # port scan
 
 def Port_Scanning():
-    print("")
-    print("")
-    print(colored("   #########################################################################", "red", attrs=['bold']))
-    print(colored("   #                             Start Port Scanning                       #", "red", attrs=['bold']))
-    print(colored("   #########################################################################", "red", attrs=['bold']))
-    print("")
-    time.sleep(5)
-    subprocess.call("mkdir Port-Scan" ,shell=True)
-    #os.chdir("Port-Scan")
-    print("")
-    print(colored("                                   ##### Rustscan #####                                    ", "blue", attrs=['bold']))
-    time.sleep(3)
-    print("")
-    subprocess.call("rustscan -a 'ips.txt' --ulimit 10000 | grep 'Open' | sed 's/Open //' | anew Port-Scan/open_ports.txt  " , shell=True)
-    #subprocess.call("cd ../", shell=True)
-    subprocess.call("clear", shell=True)
+    if os.path.isdir("Port-Scan"):
+        if os.path.exists("Port-Scan/open_ports.txt"):
+            pass
+    else:
+        print("")
+        print("")
+        print(colored("   #########################################################################", "red", attrs=['bold']))
+        print(colored("   #                             Start Port Scanning                       #", "red", attrs=['bold']))
+        print(colored("   #########################################################################", "red", attrs=['bold']))
+        print("")
+        time.sleep(5)
+        subprocess.call("mkdir Port-Scan" ,shell=True)
+        #os.chdir("Port-Scan")
+        print("")
+        print(colored("                                   ##### Rustscan #####                                    ", "blue", attrs=['bold']))
+        time.sleep(3)
+        print("")
+        subprocess.call("rustscan -a 'ips.txt' --ulimit 10000 | grep 'Open' | sed 's/Open //' | anew Port-Scan/open_ports.txt  " , shell=True)
+        #subprocess.call("cd ../", shell=True)
+        subprocess.call("clear", shell=True)
 Port_Scanning()
 
 
 #scan vulnerabilities
 
 def Vulnerabilities():
-    print("")
-    print("")
-    print(colored("   #########################################################################", "red", attrs=['bold']))
-    print(colored("   #                     Start Scanning For Vulnerabilities                #", "red", attrs=['bold']))
-    print(colored("   #########################################################################", "red", attrs=['bold']))
-    print("")
-    time.sleep(5)
-    subprocess.call("mkdir Vulnerabilities", shell=True)
-    #os.chdir("Vulnerabilities")
-    print("")
-    print(colored("                                   ##### Nuclei #####                                    ", "blue", attrs=['bold']))
-    time.sleep(3)
-    print("")
-    try:
-        subprocess.call("nuclei -l hosts.txt -t ~/nuclei-templates/ -et ~/nuclei-templates/technologies/ -et ~/nuclei-templates/takeovers/ -o Vulnerabilities/Vulnerabilities.txt" ,shell=True)
-        subprocess.call("cat Vulnerabilities/Vulnerabilities | grep -i 'info' | anew Vulnerabilities/info.txt ", shell=True)
-        subprocess.call("cat Vulnerabilities/Vulnerabilities | grep -i 'low' | anew Vulnerabilities/low.txt ", shell=True)
-        subprocess.call("cat Vulnerabilities/Vulnerabilities | grep -i 'medium' | anew Vulnerabilities/medium.txt ", shell=True)
-        subprocess.call("cat Vulnerabilities/Vulnerabilities | grep -i 'high' | anew Vulnerabilities/high.txt ", shell=True)
-        subprocess.call("cat Vulnerabilities/Vulnerabilities | grep -i 'critical' | anew Vulnerabilities/critical.txt ", shell=True)
-        subprocess.call("cat Vulnerabilities/Vulnerabilities | grep -i 'unknown' | anew Vulnerabilities/unknown.txt ", shell=True)
-        #subprocess.call("cd ../" ,shell=True)
-        subprocess.call("clear", shell=True)
-    except Exception as e:
-        print(colored("[-] Error has occured !" + e, "red", attrs=['bold']))
-        pass
+    if os.path.isdir("Vulnerabilities"):
+        if os.path.exists("Vulnerabilities/Vulnerabilities.txt"):
+            pass
+    else:
+        print("")
+        print("")
+        print(colored("   #########################################################################", "red", attrs=['bold']))
+        print(colored("   #                     Start Scanning For Vulnerabilities                #", "red", attrs=['bold']))
+        print(colored("   #########################################################################", "red", attrs=['bold']))
+        print("")
+        time.sleep(5)
+        subprocess.call("mkdir Vulnerabilities", shell=True)
+        #os.chdir("Vulnerabilities")
+        print("")
+        print(colored("                                   ##### Nuclei #####                                    ", "blue", attrs=['bold']))
+        time.sleep(3)
+        print("")
+        try:
+            subprocess.call("nuclei -l hosts.txt -t ~/nuclei-templates/ -et ~/nuclei-templates/technologies/ -et ~/nuclei-templates/takeovers/ -o Vulnerabilities/Vulnerabilities.txt" ,shell=True)
+            subprocess.call("cat Vulnerabilities/Vulnerabilities.txt | grep -i 'info' | anew Vulnerabilities/info.txt ", shell=True)
+            subprocess.call("cat Vulnerabilities/Vulnerabilities.txt | grep -i 'low' | anew Vulnerabilities/low.txt ", shell=True)
+            subprocess.call("cat Vulnerabilities/Vulnerabilities.txt | grep -i 'medium' | anew Vulnerabilities/medium.txt ", shell=True)
+            subprocess.call("cat Vulnerabilities/Vulnerabilities.txt | grep -i 'high' | anew Vulnerabilities/high.txt ", shell=True)
+            subprocess.call("cat Vulnerabilities/Vulnerabilities.txt | grep -i 'critical' | anew Vulnerabilities/critical.txt ", shell=True)
+            subprocess.call("cat Vulnerabilities/Vulnerabilities.txt | grep -i 'unknown' | anew Vulnerabilities/unknown.txt ", shell=True)
+            #subprocess.call("cd ../" ,shell=True)
+            subprocess.call("clear", shell=True)
+        except Exception as e:
+            print(colored("[-] Error has occured !" + e, "red", attrs=['bold']))
+            pass
 
 Vulnerabilities()
