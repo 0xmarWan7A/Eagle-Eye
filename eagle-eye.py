@@ -92,21 +92,23 @@ else:
     print("")
     time.sleep(2)
 
-# if os.path.exists("shodan_api.txt"):
-#     print(colored("\n[+] Shodan API key already exists\n", "green", attrs=['bold']))
-#     time.sleep(2)
-#     pass
-
-# else:
-#     shodan_api = input(colored("\n[+] Enter your shodan api key : ", "blue", attrs=['bold']))
-#     time.sleep(2)
-#     if shodan_api:
-#         subprocess.call("\nshodan init " + shodan_api , shell=True)
-#         with open("shodan_api.txt", "w") as f:
-#             f.write(shodan_api)
-#             f.close()
-#             print(colored("\n[+] Done! Shodan API key saved successfully\n\n", "green", attrs=['bold']))
-#             time.sleep(2)
+if os.path.exists("shodan_api.txt"):
+    print(colored("\n[+] Shodan API key already exists\n", "green", attrs=['bold']))
+    time.sleep(2)
+    with open("shodan_api.txt", "r") as f:
+        shodan_api = f.read()
+        f.close()
+    pass
+else:
+    shodan_api = input(colored("\n[+] Enter your shodan api key : ", "blue", attrs=['bold']))
+    time.sleep(2)
+    if shodan_api:
+        subprocess.call("\nshodan init " + shodan_api , shell=True)
+        with open("shodan_api.txt", "w") as f:
+            f.write(shodan_api)
+            f.close()
+            print(colored("\n[+] Done! Shodan API key saved successfully\n\n", "green", attrs=['bold']))
+            time.sleep(2)
 
 # Type Of Scan
 
@@ -391,7 +393,7 @@ def Extract_JSFiles():
         subprocess.call("cat hosts.txt | getJS --complete --resolve --insecure --output Content-Discovery/getJS.txt" , shell=True)
         subprocess.call("subfinder -d " + target + " -silent | httpx | subjs | anew Content-Discovery/js-files.txt" , shell=True)
         subprocess.call("cat hosts.txt | katana -silent -em js -o Content-Discovery/katanajs.txt",shell=True)
-        subprocess.call("cat Content-Discovery/js-files.txt Content-Discovery/getJS.txt Content-Discovery/katanajs.txt | sort -u | uro | anew Content-Discovery/jsfiles.txt " ,shell=True)
+        subprocess.call("cat Content-Discovery/js-files.txt Content-Discovery/getJS.txt Content-Discovery/katanajs.txt | sort -u | anew Content-Discovery/jsfiles.txt " ,shell=True)
         subprocess.call("rm -rf Content-Discovery/js-files.txt Content-Discovery/getJS.txt Content-Discovery/katanajs.txt" ,shell=True)
         subprocess.call("clear", shell=True)
 
@@ -483,10 +485,23 @@ def technologies_detect():
         subprocess.call("mkdir Technologies", shell=True)
         #os.chdir("Technologies")
         print("")
-        print(colored("                                   ##### nuclei #####                                    ", "blue", attrs=['bold']))
+        print(colored("                                   ##### httpx #####                                    ", "blue", attrs=['bold']))
         time.sleep(3)
         print("")
-        subprocess.call("cat hosts.txt | nuclei -t ~/nuclei-templates/technologies/ -o Technologies/technologies.txt" , shell=True)
+        subprocess.call("cat hosts.txt | httpx -threads 100 -match-string 'wordpress' -o Technologies/wordpress.txt" , shell=True)
+        subprocess.call("cat hosts.txt | httpx -threads 100 -match-string 'symfony' -o Technologies/symfony.txt" , shell=True)
+        subprocess.call("cat hosts.txt | httpx -threads 100 -match-string 'grafana' -o Technologies/grafana.txt" , shell=True)
+        subprocess.call("cat hosts.txt | httpx -threads 100 -match-string 'VMware' -o Technologies/VMware.txt" , shell=True)
+        subprocess.call("cat hosts.txt | httpx -threads 100 -match-string 'confluence' -o Technologies/confluence.txt" , shell=True)
+        subprocess.call("cat hosts.txt | httpx -threads 100 -match-string 'Jira' -o Technologies/Jira.txt" , shell=True)
+        subprocess.call("cat hosts.txt | httpx -threads 100 -match-string 'Elasticsearch' -o Technologies/Elasticsearch.txt" , shell=True)
+        subprocess.call("cat hosts.txt | httpx -threads 100 -match-string 'WS02' -o Technologies/WS02.txt" , shell=True)
+        subprocess.call("cat hosts.txt | httpx -threads 100 -match-string 'Oracle' -o Technologies/Oracle.txt" , shell=True)
+        subprocess.call("cat hosts.txt | httpx -threads 100 -match-string 'tomcat' -o Technologies/tomcat.txt" , shell=True)
+        subprocess.call("cat hosts.txt | httpx -threads 100 -match-string 'springcloud' -o Technologies/springcloud.txt" , shell=True)
+        subprocess.call("cat hosts.txt | httpx -threads 100 -match-string 'bigip' -o Technologies/bigip.txt" , shell=True)
+        subprocess.call("cat hosts.txt | httpx -threads 100 -match-string 'drupal' -o Technologies/drupal.txt" , shell=True)
+        subprocess.call("cat hosts.txt | httpx -threads 100 -match-string 'AEM' -o Technologies/AEM.txt" , shell=True)
         #subprocess.call("cd ../", shell=True)
         subprocess.call("clear", shell=True)
 technologies_detect()
